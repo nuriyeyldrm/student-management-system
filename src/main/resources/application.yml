@@ -1,0 +1,22 @@
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+  port: 8080
+  servlet:
+    context-path: /std-mgmt-sys/api
+
+spring:
+  datasource:
+    password: admin
+    url: jdbc:postgresql://localhost:5432/universitysystem
+    username: kaan
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
