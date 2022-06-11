@@ -1,5 +1,6 @@
 package dev.proqa.studentmanagementsystem.entities;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,11 +8,10 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
 @Entity
 @Table(name ="user_modify_info")
-@NoArgsConstructor
-@Getter
-@Setter
 public class UserModifyInfo {
 
     @Id

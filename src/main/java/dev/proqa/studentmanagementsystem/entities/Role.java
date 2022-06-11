@@ -1,18 +1,14 @@
 package dev.proqa.studentmanagementsystem.entities;
 
 import dev.proqa.studentmanagementsystem.entities.enumeration.UserRole;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Data
+@NoArgsConstructor
 @Entity
 @Table(name ="roles")
-@NoArgsConstructor
-@Getter
-@Setter
 public class Role {
 
     @Id
@@ -21,6 +17,8 @@ public class Role {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private UserRole name;
+    private UserRole userRole;
+
+
 
 }
