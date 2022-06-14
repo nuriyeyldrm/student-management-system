@@ -5,7 +5,8 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Entity
 @Table(name ="roles")
@@ -18,7 +19,4 @@ public class Role {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private UserRole userRole;
-
-
-
 }

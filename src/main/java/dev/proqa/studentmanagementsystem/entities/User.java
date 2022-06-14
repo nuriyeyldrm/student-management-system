@@ -1,20 +1,17 @@
 package dev.proqa.studentmanagementsystem.entities;
 
-
-
-
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.Set;
 
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
@@ -83,15 +80,7 @@ public class User {
     @Column(nullable = false, length = 14)
     private String phoneNumber;
 
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(	name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
-
-
-
-
-
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    private Role role;
 }
