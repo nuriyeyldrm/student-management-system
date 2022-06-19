@@ -9,9 +9,9 @@ server:
 
 spring:
   datasource:
-    password: admin
+    password: password
     url: jdbc:postgresql://localhost:5432/universitysystem
-    username: kaan
+    username: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
