@@ -83,4 +83,20 @@ public class User {
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
+
+    public User(Long id, String firstName, String lastName, String email, String username, String address, String city,
+                String state, String zipCode, String country, String phoneNumber, String password) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.username = username;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+    }
 }
