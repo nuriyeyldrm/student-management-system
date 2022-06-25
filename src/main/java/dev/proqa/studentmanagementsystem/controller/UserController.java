@@ -1,5 +1,6 @@
 package dev.proqa.studentmanagementsystem.controller;
 
+import dev.proqa.studentmanagementsystem.dto.AdminDTO;
 import dev.proqa.studentmanagementsystem.dto.UserDTO;
 import dev.proqa.studentmanagementsystem.entities.User;
 import dev.proqa.studentmanagementsystem.security.jwt.JwtUtils;
@@ -36,6 +37,14 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.fetchAllUsers();
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/student/all/auth")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDTO>> getAllStudents() {
+        List<UserDTO> users = userService.fetchAllStudents();
 
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
@@ -93,6 +102,46 @@ public class UserController {
 
         Long id = (Long) request.getAttribute("id");
         userService.updateUser(id, userDTO);
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("success", true);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @PatchMapping("/user/update/password")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Boolean>> updatePassword(HttpServletRequest request,
+                                                               @RequestBody Map<String, String> userMap) {
+        Long id = (Long) request.getAttribute("id");
+        String newPassword = userMap.get("newPassword");
+        String oldPassword = userMap.get("oldPassword");
+
+        userService.updatePassword(id, newPassword, oldPassword);
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("success", true);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @PutMapping("/user/update/{id}/auth")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Boolean>> updateUserAuth(@PathVariable Long id,
+                                                           @Valid @RequestBody AdminDTO adminDTO) {
+
+        userService.updateUserAuth(id, adminDTO);
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("success", true);
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/user/delete/{id}/auth")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Boolean>> deleteUser(@PathVariable Long id) {
+        userService.removeById(id);
 
         Map<String, Boolean> map = new HashMap<>();
         map.put("success", true);

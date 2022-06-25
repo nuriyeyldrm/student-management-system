@@ -1,7 +1,9 @@
 package dev.proqa.studentmanagementsystem.repository;
 
+import dev.proqa.studentmanagementsystem.dto.AdminDTO;
 import dev.proqa.studentmanagementsystem.dto.UserDTO;
 import dev.proqa.studentmanagementsystem.entities.User;
+import dev.proqa.studentmanagementsystem.entities.Role;
 import dev.proqa.studentmanagementsystem.exception.BadRequestException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,7 +24,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 //    @Query("SELECT new dev.proqa.studentmanagementsystem.dto.UserDTO(u) FROM User u WHERE u.id = ?1")
     Optional<UserDTO> findByIdOrderById(Long id);
 
+    Optional<AdminDTO> findByIdOrderByUsername(Long id);
+
     List<UserDTO> findAllBy();
+
+    List<UserDTO> findByRole(Role role);
 
     Boolean existsByEmail(String email);
 

@@ -1,5 +1,6 @@
 package dev.proqa.studentmanagementsystem.service;
 
+import dev.proqa.studentmanagementsystem.dto.AdminDTO;
 import dev.proqa.studentmanagementsystem.dto.UserDTO;
 import dev.proqa.studentmanagementsystem.entities.Role;
 import dev.proqa.studentmanagementsystem.entities.User;
@@ -7,6 +8,7 @@ import dev.proqa.studentmanagementsystem.entities.enumeration.UserRole;
 import dev.proqa.studentmanagementsystem.exception.AuthException;
 import dev.proqa.studentmanagementsystem.exception.BadRequestException;
 import dev.proqa.studentmanagementsystem.exception.ConflictException;
+import dev.proqa.studentmanagementsystem.exception.ResourceNotFoundException;
 import dev.proqa.studentmanagementsystem.repository.RoleRepository;
 import dev.proqa.studentmanagementsystem.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,11 @@ public class UserService {
     // TODO: fetchAllUsers
     public List<UserDTO> fetchAllUsers() {
         return userRepository.findAllBy();
+    }
+
+    public List<UserDTO> fetchAllStudents() {
+        Role role = roleRepository.getByUserRole(UserRole.ROLE_STUDENT);
+        return userRepository.findByRole(role);
     }
 
     public UserDTO findById(Long id) {
@@ -99,4 +106,79 @@ public class UserService {
 //                userDTO.getCountry(), userDTO.getState(), userDTO.getAddress(), user.getPassword());  not use
 
     }
+
+    public void updatePassword(Long id, String newPassword, String oldPassword) throws BadRequestException {
+
+        User user = userRepository.getById(id);
+
+        if (!BCrypt.hashpw(oldPassword, user.getPassword()).equals(user.getPassword()))
+            throw new BadRequestException("password does not match");
+
+        String hashedPassword = passwordEncoder.encode(newPassword);
+
+        user.setPassword(hashedPassword);
+
+        userRepository.save(user);
+    }
+
+    public void updateUserAuth(Long id, AdminDTO adminDTO) throws BadRequestException {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new ResolutionException(String.format(USER_NOT_FOUND_MSG, id)));
+
+        boolean emailExist = userRepository.existsByEmail(adminDTO.getEmail());
+        boolean usernameExist = userRepository.existsByUsername(adminDTO.getUsername());
+
+        if (emailExist && !adminDTO.getEmail().equals(user.getEmail())) {
+            throw new BadRequestException("Error: Email already in use!");
+        }
+
+        if (usernameExist && !adminDTO.getUsername().equals(user.getUsername())) {
+            throw new BadRequestException("Error: Username already in use!");
+        }
+
+        if (adminDTO.getPassword() == null)
+            adminDTO.setPassword(user.getPassword());
+
+        else {
+            String encodedPassword = passwordEncoder.encode(adminDTO.getPassword());
+            adminDTO.setPassword(encodedPassword);
+        }
+
+        Role role = addRole(adminDTO.getRole());
+
+        User updatedUser = new User(id, adminDTO.getFirstName(), adminDTO.getLastName(),
+                adminDTO.getEmail(), adminDTO.getUsername(), adminDTO.getPassword(),
+                adminDTO.getAddress(), adminDTO.getCity(), adminDTO.getState(),
+                adminDTO.getZipCode(), adminDTO.getCountry(), adminDTO.getPhoneNumber(),
+                role);
+
+        userRepository.save(updatedUser);
+    }
+
+    public void removeById(Long id) throws ResourceNotFoundException {
+        userRepository.findById(id).orElseThrow(() ->
+                new ResolutionException(String.format(USER_NOT_FOUND_MSG, id)));
+
+        userRepository.deleteById(id);
+    }
+
+    private Role addRole(String role) {
+
+        if (role == null){
+            return roleRepository.findByUserRole(UserRole.ROLE_STUDENT)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        }
+        else {
+            if ("Administrator".equals(role)) {
+                return roleRepository.findByUserRole(UserRole.ROLE_ADMIN)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            }
+            else {
+                return roleRepository.findByUserRole(UserRole.ROLE_STUDENT)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            }
+        }
+    }
+
+
 }
