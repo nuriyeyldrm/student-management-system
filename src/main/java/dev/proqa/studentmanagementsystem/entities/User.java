@@ -101,4 +101,20 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.password = password;
     }
+
+    public User(String firstName, String lastName, String email, String username, String password, String address,
+                String city, String state, String zipCode, String country, String phoneNumber, Role role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.username = username;
+        this.password = password;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zipCode = zipCode;
+        this.country = country;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+    }
 }

@@ -29,7 +29,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final static String USER_NOT_FOUND_MSG = "user with id %d not found";
 
-    // TODO: fetchAllUsers
     public List<UserDTO> fetchAllUsers() {
         return userRepository.findAllBy();
     }
@@ -76,7 +75,32 @@ public class UserService {
         }
     }
 
-    // TODO: add user by admin, admin can add role
+    public void addUserAuth(AdminDTO adminDTO) throws BadRequestException {
+
+        boolean emailExist = userRepository.existsByEmail(adminDTO.getEmail());
+        boolean usernameExist = userRepository.existsByUsername(adminDTO.getUsername());
+
+        if (emailExist) {
+            throw new BadRequestException("Error: Email already in use!");
+        }
+
+        if (usernameExist) {
+            throw new BadRequestException("Error: Username already in use!");
+        }
+
+        String encodedPassword = passwordEncoder.encode(adminDTO.getPassword());
+        adminDTO.setPassword(encodedPassword);
+
+        Role role = addRole(adminDTO.getRole());
+
+        User updatedUser = new User(adminDTO.getFirstName(), adminDTO.getLastName(),
+                adminDTO.getEmail(), adminDTO.getUsername(), adminDTO.getPassword(),
+                adminDTO.getAddress(), adminDTO.getCity(), adminDTO.getState(),
+                adminDTO.getZipCode(), adminDTO.getCountry(), adminDTO.getPhoneNumber(),
+                role);
+
+        userRepository.save(updatedUser);
+    }
 
     public void updateUser(Long id, UserDTO userDTO) throws BadRequestException {
 

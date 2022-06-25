@@ -95,6 +95,17 @@ public class UserController {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    @PostMapping("/user/add")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Boolean>> addUser(@Valid @RequestBody AdminDTO adminDTO) {
+        userService.addUserAuth(adminDTO);
+
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("User added successfully!", true);
+
+        return new ResponseEntity<>(map, HttpStatus.CREATED);
+    }
+
     @PutMapping("/user/update")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<Map<String, Boolean>> updateUser(HttpServletRequest request,
