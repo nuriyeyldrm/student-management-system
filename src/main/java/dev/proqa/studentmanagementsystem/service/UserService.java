@@ -16,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.lang.module.ResolutionException;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +39,7 @@ public class UserService {
 
     public UserDTO findById(Long id) {
         return userRepository.findByIdOrderById(id).orElseThrow(() ->
-                new ResolutionException(String.format(USER_NOT_FOUND_MSG, id)));
+                new ResourceNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
     }
 
     public void register(User user) {
@@ -57,7 +56,7 @@ public class UserService {
         user.setPassword(encodedPassword);
 
         Role userRole = roleRepository.findByUserRole(UserRole.ROLE_STUDENT)
-                .orElseThrow(() -> new ResolutionException("Error: Role is not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Error: Role is not found."));
 
         user.setRole(userRole);
         userRepository.save(user);
@@ -147,7 +146,7 @@ public class UserService {
 
     public void updateUserAuth(Long id, AdminDTO adminDTO) throws BadRequestException {
         User user = userRepository.findById(id).orElseThrow(() ->
-                new ResolutionException(String.format(USER_NOT_FOUND_MSG, id)));
+                new ResourceNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
 
         boolean emailExist = userRepository.existsByEmail(adminDTO.getEmail());
         boolean usernameExist = userRepository.existsByUsername(adminDTO.getUsername());
@@ -181,7 +180,7 @@ public class UserService {
 
     public void removeById(Long id) throws ResourceNotFoundException {
         userRepository.findById(id).orElseThrow(() ->
-                new ResolutionException(String.format(USER_NOT_FOUND_MSG, id)));
+                new ResourceNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
 
         userRepository.deleteById(id);
     }

@@ -86,6 +86,8 @@ public class User {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
+    public User(Long id){
+       this.id = id;    }
     public User(Long id, String firstName, String lastName, String email, String username, String address, String city,
                 String state, String zipCode, String country, String phoneNumber, String password) {
         this.id = id;
