@@ -1,8 +1,6 @@
 package dev.proqa.studentmanagementsystem.dto;
 
-import dev.proqa.studentmanagementsystem.entities.Department;
 import dev.proqa.studentmanagementsystem.entities.Student;
-import dev.proqa.studentmanagementsystem.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
