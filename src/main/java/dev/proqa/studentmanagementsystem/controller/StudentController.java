@@ -1,7 +1,6 @@
 package dev.proqa.studentmanagementsystem.controller;
 
 import dev.proqa.studentmanagementsystem.dto.StudentDTO;
-import dev.proqa.studentmanagementsystem.entities.Department;
 import dev.proqa.studentmanagementsystem.entities.Student;
 import dev.proqa.studentmanagementsystem.service.StudentService;
 import lombok.AllArgsConstructor;
@@ -12,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -50,4 +49,6 @@ public class StudentController {
 
         return new ResponseEntity<>(map, HttpStatus.CREATED);
     }
+
+
 }

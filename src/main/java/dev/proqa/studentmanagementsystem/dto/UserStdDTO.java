@@ -11,23 +11,22 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class StudentDTO {
-
-    private Long id;
+public class UserStdDTO {
 
     private Long studentID;
 
     private LocalDateTime enrollTime;
 
-    private UserDTO userId;
+    private UserDTO user;
 
     private String departmentName;
 
-    public StudentDTO(Student student) {
-        this.id = student.getId();
+    public UserStdDTO(User user, Student student) {
         this.studentID = student.getStudentID();
         this.enrollTime = student.getEnrollTime();
-        this.userId = new UserDTO(student.getUserId());
+        this.user = new UserDTO(user);
         this.departmentName = student.getDepartmentId().getName();
     }
 }
+
+

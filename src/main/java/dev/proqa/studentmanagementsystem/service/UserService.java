@@ -1,8 +1,9 @@
 package dev.proqa.studentmanagementsystem.service;
 
-import dev.proqa.studentmanagementsystem.dto.AdminDTO;
-import dev.proqa.studentmanagementsystem.dto.UserDTO;
+import dev.proqa.studentmanagementsystem.dto.*;
+import dev.proqa.studentmanagementsystem.dto.enumeration.PagingHeaders;
 import dev.proqa.studentmanagementsystem.entities.Role;
+import dev.proqa.studentmanagementsystem.entities.Student;
 import dev.proqa.studentmanagementsystem.entities.User;
 import dev.proqa.studentmanagementsystem.entities.enumeration.UserRole;
 import dev.proqa.studentmanagementsystem.exception.AuthException;
@@ -10,13 +11,23 @@ import dev.proqa.studentmanagementsystem.exception.BadRequestException;
 import dev.proqa.studentmanagementsystem.exception.ConflictException;
 import dev.proqa.studentmanagementsystem.exception.ResourceNotFoundException;
 import dev.proqa.studentmanagementsystem.repository.RoleRepository;
+import dev.proqa.studentmanagementsystem.repository.StudentRepository;
+import dev.proqa.studentmanagementsystem.repository.UserPageableRepository;
 import dev.proqa.studentmanagementsystem.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -25,6 +36,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final UserPageableRepository userPageableRepository;
+    private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final static String USER_NOT_FOUND_MSG = "user with id %d not found";
 
@@ -41,6 +54,54 @@ public class UserService {
         return userRepository.findByIdOrderById(id).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(USER_NOT_FOUND_MSG, id)));
     }
+
+    public PagingResponse get(Specification<User> spec, Pageable pageable) {
+        Page<User> page = userPageableRepository.findAll(spec, pageable);
+        List<User> content = page.getContent();
+        return new PagingResponse(page.getTotalElements(), (long) page.getNumber(),
+                (long) page.getNumberOfElements(), pageable.getOffset(), (long) page.getTotalPages(), content);
+    }
+
+    public List<User> get(Specification<User> spec, Sort sort) {
+        return userPageableRepository.findAll(spec, sort);
+    }
+
+    public PagingResponse get(Specification<User> spec, HttpHeaders headers, Sort sort) {
+        if (isRequestPaged(headers)) {
+            return get(spec, buildPageRequest(headers, sort));
+        } else {
+            List<User> entities = get(spec, sort);
+            return new PagingResponse((long) entities.size(), 0L,
+                    0L, 0L, 0L, entities);
+        }
+    }
+
+    public PagingResponseDTO searchAll(PagingResponse pagingResponse) {
+        List<User> elements = pagingResponse.getElements();
+
+        List<UserStdDTO> search = new ArrayList<>();
+
+        for (User u : elements){
+            Student student = studentRepository.getByUserId(u);
+            search.add(new UserStdDTO(u, student));
+        }
+
+        return new PagingResponseDTO(pagingResponse.getCount(),
+                pagingResponse.getPageNumber(), pagingResponse.getPageSize(), pagingResponse.getPageOffset(),
+                pagingResponse.getPageTotal(), search);
+    }
+
+    private boolean isRequestPaged(HttpHeaders headers) {
+        return headers.containsKey(PagingHeaders.PAGE_NUMBER.getName()) &&
+                headers.containsKey(PagingHeaders.PAGE_SIZE.getName());
+    }
+
+    private Pageable buildPageRequest(HttpHeaders headers, Sort sort) {
+        int page = Integer.parseInt(Objects.requireNonNull(headers.get(PagingHeaders.PAGE_NUMBER.getName())).get(0));
+        int size = Integer.parseInt(Objects.requireNonNull(headers.get(PagingHeaders.PAGE_SIZE.getName())).get(0));
+        return PageRequest.of(page, size, sort);
+    }
+
 
     public void register(User user) {
 

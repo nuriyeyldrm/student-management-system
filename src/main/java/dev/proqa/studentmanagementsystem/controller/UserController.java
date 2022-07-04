@@ -1,11 +1,18 @@
 package dev.proqa.studentmanagementsystem.controller;
 
-import dev.proqa.studentmanagementsystem.dto.AdminDTO;
-import dev.proqa.studentmanagementsystem.dto.UserDTO;
+import dev.proqa.studentmanagementsystem.dto.*;
+import dev.proqa.studentmanagementsystem.dto.enumeration.PagingHeaders;
+import dev.proqa.studentmanagementsystem.entities.Student;
 import dev.proqa.studentmanagementsystem.entities.User;
 import dev.proqa.studentmanagementsystem.security.jwt.JwtUtils;
 import dev.proqa.studentmanagementsystem.service.UserService;
 import lombok.AllArgsConstructor;
+import net.kaczmarzyk.spring.data.jpa.web.annotation.And;
+import net.kaczmarzyk.spring.data.jpa.web.annotation.Spec;
+import net.kaczmarzyk.spring.data.jpa.domain.Like;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,6 +71,28 @@ public class UserController {
         UserDTO user = userService.findById(id);
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/auth/search")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserStdDTO>> search(
+            @And({
+                    @Spec(path = "firstName", params = "firstName", spec = Like.class),
+                    @Spec(path = "lastName", params = "lastName", spec = Like.class),
+                    @Spec(path = "email", params = "email", spec = Like.class),
+                    @Spec(path = "username", params = "username", spec = Like.class)
+            })Specification<User> spec,
+            Sort sort,
+            @RequestHeader HttpHeaders headers){
+
+        final PagingResponse response = userService.get(spec, headers, sort);
+        final PagingResponseDTO responseDTO = userService.searchAll(response);
+
+        return new ResponseEntity<>(responseDTO.getElements(), returnHttpHeaders(responseDTO), HttpStatus.OK);
+
+
+
     }
 
     @PostMapping("/register")
@@ -158,5 +187,15 @@ public class UserController {
         map.put("success", true);
 
         return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    public HttpHeaders returnHttpHeaders(PagingResponseDTO response) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(PagingHeaders.COUNT.getName(), String.valueOf(response.getCount()));
+        headers.set(PagingHeaders.PAGE_SIZE.getName(), String.valueOf(response.getPageSize()));
+        headers.set(PagingHeaders.PAGE_OFFSET.getName(), String.valueOf(response.getPageOffset()));
+        headers.set(PagingHeaders.PAGE_NUMBER.getName(), String.valueOf(response.getPageNumber()));
+        headers.set(PagingHeaders.PAGE_TOTAL.getName(), String.valueOf(response.getPageTotal()));
+        return headers;
     }
 }
